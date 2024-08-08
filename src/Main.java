@@ -8,7 +8,29 @@ public class Main {
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
+        students = new String[][]{
+                {"1", "Chamath", "25", "0712345678", "123 Main St, Colombo", "2021"},
+                {"2", "Kalpani", "23", "0771234567", "456 Park Ave, Kandy", "2021"},
+                {"3", "Kalana", "22", "0751234567", "789 South St, Galle", "2021"}
+        };
+        subjects = new String[][]{
+                {"1", "PRF"},
+                {"2", "DBMS"},
+                {"3", "OOP"}
+        };
+        marks = new String[][]{
+                {"1", "1", "85"},
+                {"1", "2", "90"},
+                {"1", "3", "75"},
+                {"2", "1", "80"},
+                {"2", "2", "95"},
+                {"2", "3", "70"},
+                {"3", "1", "75"},
+                {"3", "2", "85"},
+                {"3", "3", "90"}
+        };
         mainMenu();
+
     }
 
     private static void clearConsole() {
@@ -58,16 +80,12 @@ public class Main {
     private static void manageStudent() {
         while (true) {
             printHeader("STUDENT Management");
-            clearConsole();
             System.out.println("1) Add new Student");
             System.out.println("2) Update Student");
             System.out.println("3) View Student");
             System.out.println("4) Main");
             System.out.print("Enter your choice: ");
             String choice = scanner.nextLine();
-            System.out.println();
-            System.out.println();
-            System.out.println();
             switch (choice) {
                 case "1":
                     addStudent();
@@ -191,8 +209,6 @@ public class Main {
         }
 
         System.out.println();
-        System.out.println();
-        System.out.println();
         System.out.println("Do you want to go to Student Management Form? (Y/N)");
         String choice = scanner.nextLine();
         if (choice.equalsIgnoreCase("Y")) {
@@ -263,71 +279,114 @@ public class Main {
 
     private static void viewSubMarks() {
         printHeader("VIEW Sub Marks");
-        System.out.printf("%-10s | %-20s | %-10s | %-10s | %-20s | %-10s | %-10s | %-10s%n",
-                "Id", "Name", "Batch", "Sub Id", "Sub Name", "Marks", "Total", "Avg");
-        System.out.println("-----------------------------------------------------------------------------------------------");
+        System.out.println();
+        System.out.println("No. of Students: " + students.length);
+        System.out.println("No. of Subjects: " + subjects.length);
+        System.out.println();
+        System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s | %-10s%n", "Id", "Name", "Batch", "Sub Id", "Sub Name", "Marks");
+        System.out.println("-----------------------------------------------------------------------------------------------------");
 
-        // Iterate through each student
-        for (String[] student : students) {
-            String studentId = student[0];
-            String studentName = student[1];
-            String batch = student[5];
+        // Array to store total marks for each student
+        int[][] studentTotals = new int[students.length][2]; // [0]: student index, [1]: total marks
+
+        // Calculate total marks for each student
+        for (int i = 0; i < students.length; i++) {
+            String studentId = students[i][0];
+            int totalMarks = 0;
+
+            for (String[] mark : marks) {
+                if (mark[1].equals(studentId)) {
+                    totalMarks += Integer.parseInt(mark[2]);
+                }
+            }
+            studentTotals[i][0] = i;
+            studentTotals[i][1] = totalMarks;
+        }
+
+        // Sort students by total marks in descending order to determine places
+        java.util.Arrays.sort(studentTotals, (a, b) -> Integer.compare(b[1], a[1]));
+
+        // Create an array to store the place of each student
+        int[] studentPlaces = new int[students.length];
+        for (int i = 0; i < studentTotals.length; i++) {
+            studentPlaces[studentTotals[i][0]] = i + 1;
+        }
+
+        // Iterate through students to display their marks and places
+        for (int i = 0; i < students.length; i++) {
+            String studentId = students[i][0];
+            String studentName = students[i][1];
+            String studentBatch = students[i][5];
 
             int totalMarks = 0;
             int subjectCount = 0;
 
-            // Find the marks for this student
-            for (String[] mark : marks) {
-                if (mark[1].equals(studentId)) {
-                    String subId = mark[0];
-                    String marksValue = mark[2];
+            boolean firstPrint = true; // Flag to print student details only once
 
-                    // Find the subject name for this mark
-                    String subName = "";
-                    for (String[] subject : subjects) {
-                        if (subject[0].equals(subId)) {
-                            subName = subject[1];
-                            break;
+            for (String[] subject : subjects) {
+                String subjectId = subject[0];
+                String subjectName = subject[1];
+
+                boolean hasMarks = false;
+                for (String[] mark : marks) {
+                    if (mark[0].equals(subjectId) && mark[1].equals(studentId)) {
+                        int subjectMarks = Integer.parseInt(mark[2]);
+                        totalMarks += subjectMarks;
+                        subjectCount++;
+                        hasMarks = true;
+
+                        if (firstPrint) {
+                            System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s | %-10d%n",
+                                    studentId, studentName, studentBatch, subjectId, subjectName, subjectMarks);
+                            firstPrint = false;
+                        } else {
+                            System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s | %-10d%n",
+                                    "", "", "", subjectId, subjectName, subjectMarks);
                         }
                     }
+                }
 
-                    totalMarks += Integer.parseInt(marksValue);
-                    subjectCount++;
-
-                    System.out.printf("%-10s | %-20s | %-10s | %-10s | %-20s | %-10s | %-10s | %-10s%n",
-                            studentId, studentName, batch, subId, subName, marksValue, "", "");
+                if (!hasMarks) {
+                    if (firstPrint) {
+                        System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s  | %-10d%n",
+                                studentId, studentName, studentBatch, subjectId, subjectName, "N/A");
+                        firstPrint = false;
+                    } else {
+                        System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s | %-10s%n",
+                                "", "", "", subjectId, subjectName, "N/A");
+                    }
                 }
             }
 
             if (subjectCount > 0) {
-                double averageMarks = (double) totalMarks / subjectCount;
-                System.out.printf("%-10s | %-20s | %-10s | %-10s | %-20s | %-10s | %-10s | %-10s%n",
-                        "", "", "", "", "Total", totalMarks, "Average", averageMarks);
+                System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s | %-10s | %-10d%n", "", "", "", "Total", "", "", totalMarks);
+                System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s | %-10s | %-10.2f%n", "", "", "", "Average", "", "", totalMarks / (double) subjectCount);
+                //places
+                int studentPlace = studentPlaces[i];
+                System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s | %-10s | %-10d%n", "", "", "", "Place", "", "", studentPlace);
+                System.out.println();
+                System.out.println("-----------------------------------------------------------------------------------------------------");
+            } else {
+                System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s | %-10s | %-10s%n", "", "", "", "Total", "", "", "N/A");
+                System.out.printf("%-10s | %-15s | %-10s | %-10s | %-15s | %-10s | %-10s%n", "", "", "", "Average", "", "", "N/A");
             }
-            System.out.println("-----------------------------------------------------------------------------------------------");
+            System.out.println();
         }
 
         System.out.println();
-        System.out.println("[1].Main   [2].Exit");
-        System.out.print("Enter your choice: ");
+        System.out.println("Do you want to go to Sub Marks Management Form? (Y/N)");
         String choice = scanner.nextLine();
-        switch (choice) {
-            case "1":
-                mainMenu();
-                break;
-            case "2":
-                System.exit(0);
-            default:
-                System.out.println("Invalid choice. Please try again.");
+        if (choice.equalsIgnoreCase("Y")) {
+            manageSubMarks();
+        } else {
+            mainMenu();
         }
     }
 
-    private static String[][] growArray(String[][] original, String[] newEntry) {
-        String[][] newArray = new String[original.length + 1][newEntry.length];
-        for (int i = 0; i < original.length; i++) {
-            newArray[i] = original[i];
-        }
-        newArray[original.length] = newEntry;
+    private static String[][] growArray(String[][] array, String[] newElement) {
+        String[][] newArray = new String[array.length + 1][];
+        System.arraycopy(array, 0, newArray, 0, array.length);
+        newArray[array.length] = newElement;
         return newArray;
     }
 }
