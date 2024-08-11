@@ -1,10 +1,12 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
-    private static String[][] students ={};
-    private static String[][] subjects ={};
-    private static String[][] marks ={};
+    private static String[][] students = new String[0][6];
+    private static String[][] subjects = new String[0][2];
+    private static String[][] marks = new String[0][3];
     private static Scanner scanner = new Scanner(System.in);
+    private static String[][] user = new String[0][2];
 
     public static void main(String[] args) {
         students = new String[][]{
@@ -28,10 +30,31 @@ public class Main {
                 {"3", "2", "85"},
                 {"3", "3", "90"}
         };
+        user = new String[][]{
+                {"1", "1"},
+                {"Chamath", "123"}
+        };
+
+        login();
         mainMenu();
 
     }
-
+    private static void login() {
+        printHeader("LOGIN");
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+        for (int i = 0; i < user.length; i++) {
+            if (user[i][0].equals(username) && user[i][1].equals(password)) {
+                System.out.println("Login successful.");
+                mainMenu();
+            }else {
+                System.out.println("Invalid username or password. Please try again.");
+                login();
+            }
+        }
+    }
     private static void clearConsole() {
         try {
             if (System.getProperty("os.name").contains("Windows")) {
@@ -138,14 +161,7 @@ public class Main {
         printHeader("ADD Student");
         String[] student = new String[6];
         System.out.print("Enter Student ID: ");
-        String Id= scanner.nextLine();
-        if (Id == null || Id.isEmpty()) {
-            System.out.println("Student ID cannot be empty.");
-            return;
-        } else if (student.length > 0 && java.util.Arrays.stream(students).anyMatch(s -> s[0].equals(Id))) {
-            System.out.println("Student ID already exists.");
-            return;
-        }
+        student[0] = scanner.nextLine();
         System.out.print("Enter Name: ");
         student[1] = scanner.nextLine();
         System.out.print("Enter Age: ");
@@ -228,15 +244,7 @@ public class Main {
         printHeader("ADD Subject");
         String[] subject = new String[2];
         System.out.print("Enter Subject ID: ");
-        String Id = scanner.nextLine();
-        if (Id == null || Id.isEmpty()) {
-            System.out.println("Subject ID cannot be empty.");
-            return;
-        } else if (subject.length > 0 && java.util.Arrays.stream(subjects).anyMatch(s -> s[0].equals(Id))) {
-            System.out.println("Subject ID already exists.");
-            return;
-
-        }
+        subject[0] = scanner.nextLine();
         System.out.print("Enter Subject Name: ");
         subject[1] = scanner.nextLine();
 
